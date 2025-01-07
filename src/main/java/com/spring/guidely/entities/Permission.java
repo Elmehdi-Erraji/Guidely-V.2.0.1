@@ -1,23 +1,19 @@
 package com.spring.guidely.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
 @Entity
-@Table(name = "roles")
+@Table(name = "permissions")
 @Setter
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Role {
+public class Permission {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -25,6 +21,6 @@ public class Role {
     @Column(unique = true, nullable = false)
     private String name;
 
-    @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "permission", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<RolePermission> rolePermissions = new HashSet<>();
 }

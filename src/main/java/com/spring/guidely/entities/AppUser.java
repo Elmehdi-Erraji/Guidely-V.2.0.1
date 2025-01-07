@@ -9,15 +9,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
-
+@Entity
+@Table(name = "app_users")
 @Setter
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
 public class AppUser {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -31,15 +29,7 @@ public class AppUser {
     @Column(nullable = false)
     private String password;
 
-    @ManyToOne
-    @JoinColumn(name = "role_id")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "role_id", nullable = false)
     private Role role;
-
-    // Relationships
-    @OneToMany(mappedBy = "user")
-    private List<Ticket> tickets;
-
-
-    // Getters and Setters
 }
-
