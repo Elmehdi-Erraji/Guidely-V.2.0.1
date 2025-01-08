@@ -47,8 +47,8 @@ public class AuthService {
             throw new AuthException("Invalid credentials!");
         }
 
-        String accessToken = jwtService.generateAccessToken(appUser.getEmail());
-        String refreshToken = jwtService.generateRefreshToken(appUser.getEmail());
+        String accessToken = jwtService.generateAccessToken(appUser);
+        String refreshToken = jwtService.generateRefreshToken(appUser);
 
         // If storing refresh token in DB:
         //   RefreshToken entity = new RefreshToken();
@@ -59,23 +59,25 @@ public class AuthService {
         return new AuthResponse(accessToken, refreshToken);
     }
 
-
-
     public AuthResponse refreshToken(String refreshToken) {
-        // If storing tokens in DB:
-        //   Check if refreshToken exists and is valid or not revoked.
+        // If storing tokens in DB, check if refreshToken exists and is valid/not revoked.
 
         if (!jwtService.validateToken(refreshToken)) {
             throw new AuthException("Invalid refresh token!");
         }
 
+        // We need the user to generate a new token with user-based claims.
         String email = jwtService.getEmailFromToken(refreshToken);
 
+        // Fetch the AppUser from the DB so we can call generateAccessToken(AppUser)
+        AppUser appUser = authRepository.findByEmail(email)
+                .orElseThrow(() -> new AuthException("User not found for refresh token"));
+
         // Generate a new Access Token
-        String newAccessToken = jwtService.generateAccessToken(email);
+        String newAccessToken = jwtService.generateAccessToken(appUser);
 
         // Optionally generate a new Refresh Token as well
-        String newRefreshToken = jwtService.generateRefreshToken(email);
+        String newRefreshToken = jwtService.generateRefreshToken(appUser);
 
         // If storing in DB, replace the old token with new one, etc.
 
