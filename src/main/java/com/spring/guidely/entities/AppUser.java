@@ -27,6 +27,7 @@ public class AppUser {
     @Column(nullable = false)
     private String password;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
