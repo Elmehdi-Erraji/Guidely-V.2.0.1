@@ -64,11 +64,11 @@ databaseChangeLog:
             columns:
               - column:
                   name: id
-                  type: bigint
-                  autoIncrement: true
+                  type: uuid
                   constraints:
                     primaryKey: true
                     nullable: false
+                  defaultValueComputed: gen_random_uuid()
               - column:
                   name: name
                   type: varchar(255)
