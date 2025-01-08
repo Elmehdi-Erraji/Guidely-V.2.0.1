@@ -2,6 +2,7 @@ package com.spring.guidely.web.rest;
 
 import com.spring.guidely.entities.AppUser;
 import com.spring.guidely.service.AuthService;
+import com.spring.guidely.service.dto.AuthResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,12 +20,21 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public String login(@RequestBody AppUser appUser) {
-        return authService.login(appUser.getEmail(), appUser.getPassword());
+    public ResponseEntity<AuthResponse> login(@RequestBody AppUser appUser) {
+        AuthResponse response = authService.login(appUser.getEmail(), appUser.getPassword());
+        return ResponseEntity.ok(response);
     }
+
 
     @PostMapping("/register")
     public ResponseEntity<AppUser> register(@RequestBody AppUser appUser) {
         return ResponseEntity.ok(authService.register(appUser));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResponse> refresh(@RequestBody String refreshToken) {
+        // e.g. pass JSON: { "refreshToken": "some-token" } or just the token string
+        AuthResponse response = authService.refreshToken(refreshToken);
+        return ResponseEntity.ok(response);
     }
 }

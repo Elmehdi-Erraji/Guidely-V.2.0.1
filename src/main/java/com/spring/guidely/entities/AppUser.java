@@ -6,14 +6,20 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.UUID;
+
 
 @Entity
 @Table(name = "app_users")
 @NoArgsConstructor
 @AllArgsConstructor
-public class AppUser {
+public class AppUser implements UserDetails {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private UUID id;
@@ -24,13 +30,16 @@ public class AppUser {
     @Column(unique = true, nullable = false)
     private String email;
 
+
     @Column(nullable = false)
     private String password;
 
-    @JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
+
+    // Constructors, getters, and setters...
+    // =====================================
 
     public UUID getId() {
         return id;
@@ -48,6 +57,13 @@ public class AppUser {
         this.name = name;
     }
 
+    @Override
+    public String getUsername() {
+        // By default, Spring uses 'username' to authenticate,
+        // but we are using 'email' as the unique user identifier.
+        return email;
+    }
+
     public String getEmail() {
         return email;
     }
@@ -56,10 +72,13 @@ public class AppUser {
         this.email = email;
     }
 
+    // This method from UserDetails -> Return the password
+    @Override
     public String getPassword() {
         return password;
     }
 
+    // Set the hashed/bcrypt password
     public void setPassword(String password) {
         this.password = password;
     }
@@ -70,5 +89,39 @@ public class AppUser {
 
     public void setRole(Role role) {
         this.role = role;
+    }
+
+    // === Methods from UserDetails interface ===
+
+    @JsonIgnore
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        // We can return a collection of authorities based on the role's name
+        // e.g., "ROLE_USER", "ROLE_ADMIN"
+        return Collections.singleton(() -> "ROLE_" + role.getName());
+    }
+
+    @JsonIgnore
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;  // or implement logic if you have an "expired" field
+    }
+
+    @JsonIgnore
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;  // or implement logic if you have a "locked" field
+    }
+
+    @JsonIgnore
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;  // or implement logic if you want to expire credentials
+    }
+
+    @JsonIgnore
+    @Override
+    public boolean isEnabled() {
+        return true;  // or implement logic if you have an "enabled" field
     }
 }
