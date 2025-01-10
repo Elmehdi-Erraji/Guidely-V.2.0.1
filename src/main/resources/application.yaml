@@ -25,6 +25,18 @@ spring:
       lifecycle-management: start_only
 
 
+  mail:
+    host: sandbox.smtp.mailtrap.io
+    port: 2525
+    username: 6a2a2d5efbc30a
+    password: 9f119e85b23dd8
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
 
 server:
   port: 4040
@@ -38,3 +50,17 @@ jwt:
     expiration: 900000
   refresh:
     expiration: 7200000
+
+# ==================
+# Frontend Reset URL
+# ==================
+frontend:
+  reset:
+    url: "https://your-frontend.com/reset-password?token="
+
+
+
+
+
+
+

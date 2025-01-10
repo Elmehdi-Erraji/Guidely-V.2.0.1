@@ -3,6 +3,7 @@ package com.spring.guidely.web.rest;
 import com.spring.guidely.entities.AppUser;
 import com.spring.guidely.service.AuthService;
 import com.spring.guidely.service.dto.AuthResponse;
+import com.spring.guidely.web.vm.auth.PasswordResetRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -36,5 +37,11 @@ public class AuthController {
         // e.g. pass JSON: { "refreshToken": "some-token" } or just the token string
         AuthResponse response = authService.refreshToken(refreshToken);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/request-reset")
+    public ResponseEntity<String> requestPasswordReset(@RequestBody PasswordResetRequest request) {
+        authService.requestPasswordReset(request.getEmail());
+        return ResponseEntity.ok("Password reset request sent");
     }
 }
