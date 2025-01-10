@@ -3,12 +3,15 @@ package com.spring.guidely.web.rest;
 import com.spring.guidely.entities.AppUser;
 import com.spring.guidely.service.AuthService;
 import com.spring.guidely.service.dto.AuthResponse;
+import com.spring.guidely.web.vm.auth.PasswordReset;
 import com.spring.guidely.web.vm.auth.PasswordResetRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -43,5 +46,14 @@ public class AuthController {
     public ResponseEntity<String> requestPasswordReset(@RequestBody PasswordResetRequest request) {
         authService.requestPasswordReset(request.getEmail());
         return ResponseEntity.ok("Password reset request sent");
+    }
+
+    @PostMapping("/password_change")
+    public ResponseEntity<String> passwordChange(@RequestBody PasswordReset request){
+        if(!Objects.equals(request.getNewPassword(), request.getConfirmPassword())){
+            return ResponseEntity.badRequest().body("Passwords do not match");
+        }
+        authService.resetPassword(request.getToken(),request.getNewPassword());
+        return ResponseEntity.ok("Password changed successfully");
     }
 }

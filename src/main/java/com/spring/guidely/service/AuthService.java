@@ -104,8 +104,6 @@ public class AuthService {
     }
 
 
-
-
     private String loadEmailTemplate(String templatePath) {
         try {
             InputStream inputStream = new ClassPathResource(templatePath).getInputStream();
@@ -122,8 +120,6 @@ public class AuthService {
                 .replace("{{token}}", token)
                 .replace("{{expiration}}", expiration);
     }
-
-
 
 
     public void requestPasswordReset(String email) {
@@ -161,7 +157,7 @@ public class AuthService {
                 .orElseThrow(() -> new AuthException("Invalid password reset token"));
 
         // Check if token is expired
-        if (resetToken.getExpiration().isBefore(LocalDateTime.now())) {
+        if (resetToken.isExpired()||resetToken.getExpiration().isBefore(LocalDateTime.now())) {
             throw new AuthException("Token has expired");
         }
 

@@ -16,6 +16,9 @@ public class PasswordResetToken {
 
     private LocalDateTime expiration;
 
+
+    private boolean expired = false;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private AppUser user;
@@ -52,5 +55,13 @@ public class PasswordResetToken {
 
     public void setUser(AppUser user) {
         this.user = user;
+    }
+
+    public boolean isExpired() {
+        return expired;
+    }
+
+    public void setExpired(boolean expired) {
+        this.expired = expired;
     }
 }
