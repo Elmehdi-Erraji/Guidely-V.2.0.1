@@ -18,7 +18,10 @@ import java.util.UUID;
 @Table(name = "app_users")
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
+@Setter
 public class AppUser implements UserDetails {
+
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,13 +36,6 @@ public class AppUser implements UserDetails {
 
     @Column(nullable = false)
     private String password;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "role_id", nullable = false)
-    private Role role;
-
-    // Constructors, getters, and setters...
-    // =====================================
 
     public UUID getId() {
         return id;
@@ -57,13 +53,6 @@ public class AppUser implements UserDetails {
         this.name = name;
     }
 
-    @Override
-    public String getUsername() {
-        // By default, Spring uses 'username' to authenticate,
-        // but we are using 'email' as the unique user identifier.
-        return email;
-    }
-
     public String getEmail() {
         return email;
     }
@@ -72,13 +61,6 @@ public class AppUser implements UserDetails {
         this.email = email;
     }
 
-    // This method from UserDetails -> Return the password
-    @Override
-    public String getPassword() {
-        return password;
-    }
-
-    // Set the hashed/bcrypt password
     public void setPassword(String password) {
         this.password = password;
     }
@@ -90,6 +72,44 @@ public class AppUser implements UserDetails {
     public void setRole(Role role) {
         this.role = role;
     }
+
+    public Department getDepartment() {
+        return department;
+    }
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "role_id", nullable = false)
+    private Role role;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "department_id", nullable = true)
+    private Department department;
+
+
+    public void setDepartment(Department department) {
+        this.department = department;
+    }
+    // Constructors, getters, and setters...
+    // =====================================
+
+
+
+    @Override
+    public String getUsername() {
+        // By default, Spring uses 'username' to authenticate,
+        // but we are using 'email' as the unique user identifier.
+        return email;
+    }
+
+
+
+    // This method from UserDetails -> Return the password
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+
 
     // === Methods from UserDetails interface ===
 
@@ -124,4 +144,7 @@ public class AppUser implements UserDetails {
     public boolean isEnabled() {
         return true;  // or implement logic if you have an "enabled" field
     }
+
+
+
 }
