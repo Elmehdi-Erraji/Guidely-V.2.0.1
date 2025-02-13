@@ -2,11 +2,12 @@ package com.spring.guidely.web.rest;
 
 import com.spring.guidely.entities.Department;
 import com.spring.guidely.service.DepartmentService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -14,6 +15,7 @@ import java.util.UUID;
 public class DepartmentController {
 
     private final DepartmentService departmentService;
+
     public DepartmentController(DepartmentService departmentService) {
         this.departmentService = departmentService;
     }
@@ -25,8 +27,8 @@ public class DepartmentController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Department>> getAllDepartments() {
-        List<Department> departments = departmentService.getAllDepartments();
+    public ResponseEntity<Page<Department>> getAllDepartments(Pageable pageable) {
+        Page<Department> departments = departmentService.getAllDepartments(pageable);
         return new ResponseEntity<>(departments, HttpStatus.OK);
     }
 
@@ -41,6 +43,7 @@ public class DepartmentController {
         Department updatedDepartment = departmentService.updateDepartment(id, department);
         return new ResponseEntity<>(updatedDepartment, HttpStatus.OK);
     }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDepartment(@PathVariable UUID id) {
         departmentService.deleteDepartment(id);
