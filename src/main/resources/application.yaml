@@ -21,7 +21,7 @@ spring:
   docker:
     compose:
       file: src/main/docker/compose.yml
-      enabled: true
+      enabled: false
       lifecycle-management: start_only
 
 
@@ -36,6 +36,7 @@ spring:
           auth: true
           starttls:
             enable: true
+
 
 
 server:

@@ -1,7 +1,9 @@
 package com.spring.guidely.service;
 
+import com.spring.guidely.config.RabbitMQConfig;
 import com.spring.guidely.entities.AppUser;
 import com.spring.guidely.repository.UserRepository;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,6 +12,8 @@ import org.springframework.stereotype.Service;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -19,16 +23,18 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final EmailService emailService;
+    private final RabbitTemplate rabbitTemplate;
 
-    public UserService(UserRepository userRepository, EmailService emailService) {
+    public UserService(UserRepository userRepository, EmailService emailService, RabbitTemplate rabbitTemplate) {
         this.userRepository = userRepository;
         this.emailService = emailService;
+        this.rabbitTemplate = rabbitTemplate;
     }
 
     public AppUser save(AppUser user) {
         AppUser createdUser = userRepository.save(user);
 
-        // Load the credentials email template from classpath
+        // Load the credentials email template from classpath (e.g. src/main/resources/templates/user-acount-credentials.html)
         String template;
         try (InputStream is = new ClassPathResource("templates/user-acount-credentials.html").getInputStream();
              BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
@@ -37,7 +43,6 @@ public class UserService {
             throw new RuntimeException("Failed to load email template", e);
         }
 
-        // Replace placeholders with actual values
         String content = template
                 .replace("{{userName}}", createdUser.getName())
                 .replace("{{email}}", createdUser.getEmail())
@@ -45,17 +50,23 @@ public class UserService {
 
         String subject = "Your Account Credentials";
 
-        // Send the email
-        emailService.sendEmail(createdUser.getEmail(), subject, content);
+        // Create a Map with email details
+        Map<String, String> emailData = new HashMap<>();
+        emailData.put("to", createdUser.getEmail());
+        emailData.put("subject", subject);
+        emailData.put("html", content);
+
+        // Publish the email data to RabbitMQ for asynchronous processing
+        rabbitTemplate.convertAndSend(RabbitMQConfig.EMAIL_EXCHANGE, RabbitMQConfig.EMAIL_ROUTING_KEY, emailData);
 
         return createdUser;
     }
 
-    public AppUser Update(AppUser user) {
+    public AppUser update(AppUser user) {
         return userRepository.save(user);
     }
 
-    public Optional<AppUser>  getUserById(UUID id) {
+    public Optional<AppUser> getUserById(UUID id) {
         return userRepository.findById(id);
     }
 
