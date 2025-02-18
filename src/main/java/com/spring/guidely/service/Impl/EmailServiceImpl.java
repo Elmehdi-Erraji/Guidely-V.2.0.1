@@ -19,14 +19,11 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public void sendEmail(String to, String subject, String html) {
         try {
-            // Create a MimeMessage
             MimeMessage message = mailSender.createMimeMessage();
-            // Create a MimeMessageHelper to set the email details
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
             helper.setTo(to);
             helper.setSubject(subject);
-            helper.setText(html, true); // true indicates HTML content
-            // Send the email
+            helper.setText(html, true);
             mailSender.send(message);
         } catch (MessagingException e) {
             throw new RuntimeException("Failed to send email", e);
