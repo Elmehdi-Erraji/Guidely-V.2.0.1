@@ -37,6 +37,16 @@ public class AppUser implements UserDetails {
     @Column(nullable = false)
     private String password;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "role_id", nullable = false)
+    private Role role;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "department_id", nullable = true)
+    private Department department;
+
+
+
     public UUID getId() {
         return id;
     }
@@ -76,14 +86,6 @@ public class AppUser implements UserDetails {
     public Department getDepartment() {
         return department;
     }
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "role_id", nullable = false)
-    private Role role;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "department_id", nullable = true)
-    private Department department;
 
 
     public void setDepartment(Department department) {
