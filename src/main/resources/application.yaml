@@ -2,17 +2,66 @@ spring:
   application:
     name: Guidely
 
+  datasource:
+    url: jdbc:postgresql://localhost:5434/guidely
+    username: guidely
+    password: guidely
+    driver-class-name: org.postgresql.Driver
+
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     show-sql: true
-    database-platform: org.hibernate.dialect.PostgresSQLDialect
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
 
   liquibase:
     change-log: db/changelog/master.yaml
+    enabled: true
 
   docker:
     compose:
       file: src/main/docker/compose.yml
-      enabled: true
+      enabled: false
       lifecycle-management: start_only
+
+
+  mail:
+    host: sandbox.smtp.mailtrap.io
+    port: 2525
+    username: 6a2a2d5efbc30a
+    password: 9f119e85b23dd8
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+
+
+server:
+  port: 4040
+
+# ==================
+# JWT Configuration
+# ==================
+jwt:
+  secret: Wdx7ZeyAoF1pZ4R7Ksc5q9ut03Hw3HYyqN3Ei2Ly+H7zXLP44xZQwp65wwroBO3S
+  access:
+    expiration: 900000
+  refresh:
+    expiration: 7200000
+
+# ==================
+# Frontend Reset URL
+# ==================
+frontend:
+  reset:
+    url: "https://your-frontend.com/reset-password?token="
+
+
+
+
+
+
+
