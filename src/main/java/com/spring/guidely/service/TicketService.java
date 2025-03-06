@@ -7,15 +7,15 @@ import java.util.UUID;
 
 public interface TicketService {
 
-    // Create or Update
     Ticket saveTicket(Ticket ticket);
 
-    // Read all
     List<Ticket> getAllTickets();
 
-    // Read one by ID
     Ticket getTicketById(UUID id);
 
-    // Delete
     void deleteTicket(UUID id);
+
+    Ticket updateTicket(Ticket ticket);
+
+    Ticket reassignTicket(UUID ticketId);
 }

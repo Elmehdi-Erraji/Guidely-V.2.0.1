@@ -1,5 +1,31 @@
 databaseChangeLog:
   - changeSet:
+      id: create-ticket-enums
+      author: Mehdi
+      changes:
+        - sql:
+            stripComments: true
+            splitStatements: false
+            sql: |
+              DO $$
+              BEGIN
+                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'ticket_status') THEN
+                  CREATE TYPE ticket_status AS ENUM ('OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED');
+                END IF;
+              END$$;
+        # Optionally, you can remove this block if the ticket_priority type is no longer used
+        - sql:
+            stripComments: true
+            splitStatements: false
+            sql: |
+              DO $$
+              BEGIN
+                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'ticket_priority') THEN
+                  CREATE TYPE ticket_priority AS ENUM ('LOW', 'MEDIUM', 'HIGH');
+                END IF;
+              END$$;
+
+  - changeSet:
       id: create_tickets_table
       author: Mehdi
       changes:
@@ -13,63 +39,52 @@ databaseChangeLog:
                     primaryKey: true
                     primaryKeyName: pk_tickets
                     nullable: false
-
               - column:
                   name: title
                   type: varchar(255)
                   constraints:
                     nullable: false
-
               - column:
                   name: description
                   type: text
-                  # nullable is true by default
-
               - column:
                   name: status
-                  type: varchar(50)
+                  type: varchar(255)
                   constraints:
                     nullable: false
-
               - column:
                   name: priority
-                  type: varchar(50)
-
+                  type: varchar(255)
+                  constraints:
+                    check: "priority IN ('LOW', 'MEDIUM', 'HIGH')"
               - column:
                   name: created_by
                   type: uuid
                   constraints:
                     nullable: false
-
               - column:
                   name: assigned_to
                   type: uuid
-                  # can be null if ticket not yet assigned
-
               - column:
                   name: created_at
                   type: timestamp
                   constraints:
                     nullable: false
-
               - column:
                   name: updated_at
                   type: timestamp
-
         - addForeignKeyConstraint:
             baseTableName: tickets
             baseColumnNames: created_by
             constraintName: fk_ticket_created_by
             referencedTableName: app_users
             referencedColumnNames: id
-
         - addForeignKeyConstraint:
             baseTableName: tickets
             baseColumnNames: assigned_to
             constraintName: fk_ticket_assigned_to
             referencedTableName: app_users
             referencedColumnNames: id
-
 
   - changeSet:
       id: create_messages_table
@@ -85,58 +100,49 @@ databaseChangeLog:
                     primaryKey: true
                     primaryKeyName: pk_messages
                     nullable: false
-
               - column:
                   name: ticket_id
                   type: uuid
                   constraints:
                     nullable: false
-
               - column:
                   name: sender_id
                   type: uuid
                   constraints:
                     nullable: false
-
               - column:
                   name: receiver_id
                   type: uuid
                   constraints:
                     nullable: false
-
               - column:
                   name: content
                   type: text
                   constraints:
                     nullable: false
-
               - column:
                   name: created_at
                   type: timestamp
                   constraints:
                     nullable: false
-
         - addForeignKeyConstraint:
             baseTableName: messages
             baseColumnNames: ticket_id
             constraintName: fk_messages_ticket
             referencedTableName: tickets
             referencedColumnNames: id
-
         - addForeignKeyConstraint:
             baseTableName: messages
             baseColumnNames: sender_id
             constraintName: fk_messages_sender
             referencedTableName: app_users
             referencedColumnNames: id
-
         - addForeignKeyConstraint:
             baseTableName: messages
             baseColumnNames: receiver_id
             constraintName: fk_messages_receiver
             referencedTableName: app_users
             referencedColumnNames: id
-
 
   - changeSet:
       id: create_notifications_table
@@ -152,44 +158,36 @@ databaseChangeLog:
                     primaryKey: true
                     primaryKeyName: pk_notifications
                     nullable: false
-
               - column:
                   name: recipient_id
                   type: uuid
                   constraints:
                     nullable: false
-
               - column:
                   name: message
                   type: varchar(255)
                   constraints:
                     nullable: false
-
               - column:
                   name: read
                   type: boolean
                   defaultValueBoolean: false
                   constraints:
                     nullable: false
-
               - column:
                   name: created_at
                   type: timestamp
                   constraints:
                     nullable: false
-
               - column:
                   name: ticket_id
                   type: uuid
-                  # can be null if some notifications aren't tied to tickets
-
         - addForeignKeyConstraint:
             baseTableName: notifications
             baseColumnNames: recipient_id
             constraintName: fk_notifications_recipient
             referencedTableName: app_users
             referencedColumnNames: id
-
         - addForeignKeyConstraint:
             baseTableName: notifications
             baseColumnNames: ticket_id

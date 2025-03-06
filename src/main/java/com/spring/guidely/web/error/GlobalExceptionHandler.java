@@ -60,4 +60,16 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleUserAlreadyExistsException(UserAlreadyExistsException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     }
+
+    @ExceptionHandler(NoSupportAgentAvailableException.class)
+    public ResponseEntity<Map<String, String>> handleNoSupportAgentAvailableException(NoSupportAgentAvailableException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(DuplicateTicketException.class)
+    public ResponseEntity<String> handleDuplicateTicketException(DuplicateTicketException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
 }

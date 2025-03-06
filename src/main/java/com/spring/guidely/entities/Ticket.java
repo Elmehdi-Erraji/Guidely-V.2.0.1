@@ -1,5 +1,7 @@
 package com.spring.guidely.entities;
 
+import com.spring.guidely.entities.enums.TicketPriority;
+import com.spring.guidely.entities.enums.TicketStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -24,13 +26,11 @@ public class Ticket {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(nullable = false)
-    private String status;
-    // Could be an enum: e.g., OPEN, IN_PROGRESS, CLOSED
+    @Enumerated(EnumType.STRING)
+    private TicketStatus status;
 
-    @Column
-    private String priority;
-    // Could be an enum: e.g., LOW, MEDIUM, HIGH
+    @Enumerated(EnumType.STRING)
+    private TicketPriority priority;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "created_by", nullable = false)
