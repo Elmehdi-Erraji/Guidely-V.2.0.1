@@ -12,6 +12,10 @@ import com.spring.guidely.service.AuthService;
 import com.spring.guidely.service.EmailService;
 import com.spring.guidely.service.dto.AuthResponse;
 import com.spring.guidely.web.error.AuthException;
+import com.spring.guidely.web.vm.auth.LoginRequestVM;
+import com.spring.guidely.web.vm.auth.RegisterRequestVM;
+import com.spring.guidely.web.vm.auth.RegisterResponseVM;
+import com.spring.guidely.web.vm.mapers.AuthVMMapper;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -19,6 +23,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
 
+import jakarta.validation.Valid;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -36,6 +41,7 @@ public class AuthServiceImpl implements AuthService {
     private final JwtService jwtService;
     private final EmailService emailService;
     private final RabbitTemplate rabbitTemplate;
+    private final AuthVMMapper authVMMapper;
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     private final int resetTokenExpirationMinutes = 60;
 
@@ -44,43 +50,45 @@ public class AuthServiceImpl implements AuthService {
                            JwtService jwtService,
                            EmailService emailService,
                            PasswordResetTokenRepository passwordResetTokenRepository,
-                           RabbitTemplate rabbitTemplate) {
+                           RabbitTemplate rabbitTemplate,
+                           AuthVMMapper authVMMapper) {
         this.authRepository = authRepository;
         this.roleRepository = roleRepository;
         this.jwtService = jwtService;
         this.emailService = emailService;
         this.passwordResetTokenRepository = passwordResetTokenRepository;
         this.rabbitTemplate = rabbitTemplate;
+        this.authVMMapper = authVMMapper;
     }
 
     @Override
-    public AppUser register(AppUser appUser) {
-        if (authRepository.findByEmail(appUser.getEmail()).isPresent()) {
+    public RegisterResponseVM register(@Valid RegisterRequestVM registerRequest) {
+        if (authRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
             throw new AuthException("Email already exists");
         }
 
+        // Map RegisterRequestVM to AppUser entity.
+        AppUser user = authVMMapper.toEntity(registerRequest);
         Role userRole = roleRepository.findByName("USER")
                 .orElseThrow(() -> new AuthException("Default role USER not found"));
+        user.setRole(userRole);
+        user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
 
-        appUser.setRole(userRole);
-        appUser.setPassword(passwordEncoder.encode(appUser.getPassword()));
-
-        return authRepository.save(appUser);
+        AppUser savedUser = authRepository.save(user);
+        return authVMMapper.toResponse(savedUser);
     }
 
     @Override
-    public AuthResponse login(String email, String rawPassword) {
-        AppUser appUser = authRepository.findByEmail(email)
+    public AuthResponse login(@Valid LoginRequestVM loginRequest) {
+        AppUser appUser = authRepository.findByEmail(loginRequest.getEmail())
                 .orElseThrow(() -> new AuthException("Email not found"));
 
-        if (!passwordEncoder.matches(rawPassword, appUser.getPassword())) {
+        if (!passwordEncoder.matches(loginRequest.getPassword(), appUser.getPassword())) {
             throw new AuthException("Invalid credentials!");
         }
 
         String accessToken = jwtService.generateAccessToken(appUser);
         String refreshToken = jwtService.generateRefreshToken(appUser);
-
-        // Optionally save refresh token in DB if needed
 
         return new AuthResponse(accessToken, refreshToken);
     }
@@ -92,7 +100,6 @@ public class AuthServiceImpl implements AuthService {
         }
 
         String email = jwtService.getEmailFromToken(refreshToken);
-
         AppUser appUser = authRepository.findByEmail(email)
                 .orElseThrow(() -> new AuthException("User not found for refresh token"));
 
@@ -126,10 +133,7 @@ public class AuthServiceImpl implements AuthService {
         emailData.put("subject", subject);
         emailData.put("html", emailContent);
 
-        // Publish email details to RabbitMQ for asynchronous sending
         rabbitTemplate.convertAndSend(RabbitMQConfig.EMAIL_EXCHANGE, RabbitMQConfig.EMAIL_ROUTING_KEY, emailData);
-
-        System.out.println("Password Reset Token: " + token);
     }
 
     @Override

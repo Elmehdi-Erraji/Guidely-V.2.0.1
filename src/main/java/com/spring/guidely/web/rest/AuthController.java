@@ -1,17 +1,14 @@
 package com.spring.guidely.web.rest;
 
-import com.spring.guidely.entities.AppUser;
 import com.spring.guidely.service.AuthService;
 import com.spring.guidely.service.dto.AuthResponse;
-import com.spring.guidely.web.vm.auth.PasswordReset;
-import com.spring.guidely.web.vm.auth.PasswordResetRequest;
+import com.spring.guidely.web.vm.auth.LoginRequestVM;
+import com.spring.guidely.web.vm.auth.RegisterRequestVM;
+import com.spring.guidely.web.vm.auth.RegisterResponseVM;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Objects;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -23,37 +20,37 @@ public class AuthController {
         this.authService = authService;
     }
 
+    @PostMapping("/register")
+    public ResponseEntity<RegisterResponseVM> register(
+            @Valid @RequestBody RegisterRequestVM registerRequest) {
+        RegisterResponseVM response = authService.register(registerRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody AppUser appUser) {
-        AuthResponse response = authService.login(appUser.getEmail(), appUser.getPassword());
+    public ResponseEntity<AuthResponse> login(
+            @Valid @RequestBody LoginRequestVM loginRequest) {
+        AuthResponse response = authService.login(loginRequest);
         return ResponseEntity.ok(response);
     }
 
-
-    @PostMapping("/register")
-    public ResponseEntity<AppUser> register(@RequestBody AppUser appUser) {
-        return ResponseEntity.ok(authService.register(appUser));
-    }
-
     @PostMapping("/refresh")
-    public ResponseEntity<AuthResponse> refresh(@RequestBody String refreshToken) {
-        // e.g. pass JSON: { "refreshToken": "some-token" } or just the token string
+    public ResponseEntity<AuthResponse> refresh(@RequestParam String refreshToken) {
         AuthResponse response = authService.refreshToken(refreshToken);
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/request-reset")
-    public ResponseEntity<String> requestPasswordReset(@RequestBody PasswordResetRequest request) {
-        authService.requestPasswordReset(request.getEmail());
-        return ResponseEntity.ok("Password reset request sent");
+    @PostMapping("/password-reset/request")
+    public ResponseEntity<Void> requestPasswordReset(@RequestParam String email) {
+        authService.requestPasswordReset(email);
+        return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/password_change")
-    public ResponseEntity<String> passwordChange(@RequestBody PasswordReset request){
-        if(!Objects.equals(request.getNewPassword(), request.getConfirmPassword())){
-            return ResponseEntity.badRequest().body("Passwords do not match");
-        }
-        authService.resetPassword(request.getToken(),request.getNewPassword());
-        return ResponseEntity.ok("Password changed successfully");
+    @PostMapping("/password-reset")
+    public ResponseEntity<Void> resetPassword(
+            @RequestParam String token,
+            @RequestParam String newPassword) {
+        authService.resetPassword(token, newPassword);
+        return ResponseEntity.ok().build();
     }
 }
