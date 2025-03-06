@@ -1,0 +1,77 @@
+databaseChangeLog:
+  - changeSet:
+      id: seed-initial-data
+      author: Mehdi
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO permissions (id, name) VALUES
+                (gen_random_uuid(), 'USER_CREATE'),
+                (gen_random_uuid(), 'USER_READ'),
+                (gen_random_uuid(), 'USER_UPDATE'),
+                (gen_random_uuid(), 'USER_DELETE'),
+                (gen_random_uuid(), 'PROFILE_READ'),
+                (gen_random_uuid(), 'PROFILE_UPDATE'),
+                (gen_random_uuid(), 'TICKET_CREATE'),
+                (gen_random_uuid(), 'TICKET_READ'),
+                (gen_random_uuid(), 'TICKET_UPDATE'),
+                (gen_random_uuid(), 'TICKET_DELETE'),
+                (gen_random_uuid(), 'TICKET_ASSIGN'),
+                (gen_random_uuid(), 'SYSTEM_SETTINGS_READ'),
+                (gen_random_uuid(), 'SYSTEM_SETTINGS_UPDATE'),
+                (gen_random_uuid(), 'SUPPORT_DASHBOARD_ACCESS'),
+                (gen_random_uuid(), 'GENERATE_REPORTS')
+              ON CONFLICT (name) DO NOTHING;
+        - sql:
+            sql: |
+              INSERT INTO roles (id, name) VALUES
+                (gen_random_uuid(), 'ADMIN'),
+                (gen_random_uuid(), 'SUPPORT_AGENT'),
+                (gen_random_uuid(), 'USER')
+              ON CONFLICT (name) DO NOTHING;
+        - sql:
+            sql: |
+              INSERT INTO role_permissions (id, role_id, permission_id)
+              SELECT gen_random_uuid(), r.id, p.id
+              FROM permissions p
+              CROSS JOIN (SELECT id FROM roles WHERE name = 'ADMIN') r
+              ON CONFLICT DO NOTHING;
+        - sql:
+            sql: |
+              INSERT INTO role_permissions (id, role_id, permission_id)
+              SELECT gen_random_uuid(), r.id, p.id
+              FROM permissions p
+              CROSS JOIN (SELECT id FROM roles WHERE name = 'SUPPORT_AGENT') r
+              WHERE p.name IN (
+                  'TICKET_CREATE',
+                  'TICKET_READ',
+                  'TICKET_UPDATE',
+                  'TICKET_ASSIGN',
+                  'PROFILE_READ',
+                  'PROFILE_UPDATE',
+                  'USER_READ',
+                  'SUPPORT_DASHBOARD_ACCESS',
+                  'GENERATE_REPORTS'
+              )
+              ON CONFLICT DO NOTHING;
+        - sql:
+            sql: |
+              INSERT INTO role_permissions (id, role_id, permission_id)
+              SELECT gen_random_uuid(), r.id, p.id
+              FROM permissions p
+              CROSS JOIN (SELECT id FROM roles WHERE name = 'USER') r
+              WHERE p.name IN (
+                  'TICKET_CREATE',
+                  'TICKET_READ',
+                  'PROFILE_READ',
+                  'PROFILE_UPDATE'
+              )
+              ON CONFLICT DO NOTHING;
+        - sql:
+            sql: |
+              INSERT INTO app_users (id, name, email, password, role_id)
+              VALUES
+                (gen_random_uuid(), 'admin', 'admin@example.com', '$2a$10$ZiY2EH7ctSVbautT5CshV.Uu2Ti2raES91Xba7Ufc4.9fXkT5Ln5e', (SELECT id FROM roles WHERE name = 'ADMIN')),
+                (gen_random_uuid(), 'support', 'support@example.com', '$2a$10$ZiY2EH7ctSVbautT5CshV.Uu2Ti2raES91Xba7Ufc4.9fXkT5Ln5e', (SELECT id FROM roles WHERE name = 'SUPPORT_AGENT')),
+                (gen_random_uuid(), 'user', 'user@example.com', '$2a$10$ZiY2EH7ctSVbautT5CshV.Uu2Ti2raES91Xba7Ufc4.9fXkT5Ln5e', (SELECT id FROM roles WHERE name = 'USER'))
+              ON CONFLICT (email) DO NOTHING;
