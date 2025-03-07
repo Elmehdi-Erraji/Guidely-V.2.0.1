@@ -1,105 +1,162 @@
-# README: Spring Security & JWT (with Refresh Tokens)
 
-## 1. Overview
+# Guidely
 
-This document summarizes how to implement **Spring Boot** authentication using **Spring Security** and **JWT** (JSON Web Tokens), along with **Refresh Tokens** for token renewal. The approach is primarily **stateless**, meaning the server does not keep session data.
+**Guidely** is a ticket management system built with Spring Boot. It handles ticket creation, assignment, and notifications while enforcing business rules such as duplicate title validation. The project leverages modern technologies and DevOps practices to ensure quality and maintainability.
 
----
+## Table of Contents
 
-## 2. Key Components
+- [Features](#features)
+- [Technologies](#technologies)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Running the Application](#running-the-application)
+  - [Locally via Maven](#locally-via-maven)
+  - [Using Docker Compose](#using-docker-compose)
+- [Testing](#testing)
+- [SonarQube Analysis](#sonarqube-analysis)
+- [API Documentation](#api-documentation)
+- [Troubleshooting](#troubleshooting)
+- [Contributing](#contributing)
+- [License](#license)
+- [Contact](#contact)
 
-- **Access Tokens**  
-  Short-lived tokens (e.g., 15 minutes) used to authorize requests to protected endpoints.
+## Features
 
-- **Refresh Tokens**  
-  Longer-lived tokens (e.g., 2 hours, 7 days) that enable a user to obtain a fresh Access Token after it expires without re-entering credentials.
+- **Ticket Operations:** Create, update, delete, and reassign tickets.
+- **Duplicate Validation:** Prevents creation or update of tickets with duplicate titles.
+- **Agent Assignment:** Automatically assigns tickets to support agents using a least busy algorithm.
+- **Notifications:** Sends email notifications via RabbitMQ.
+- **API Documentation:** Swagger/OpenAPI integration for interactive API docs.
+- **Code Quality:** Integrated Jacoco for code coverage and SonarQube for static analysis.
 
-- **User Entity & Roles**  
-  A user entity (e.g., `AppUser`) represents registered users, each with roles/permissions that determine allowed actions.
+## Technologies
 
-- **Token Validation**  
-  Access and Refresh tokens are validated on each request (or token refresh) by checking:
-    - Signature correctness (using a secret key).
-    - Expiration time (to ensure the token is not expired).
-    - Optional additional claims, such as user ID, roles, etc.
+- **Java 17**
+- **Spring Boot 3.4.1**
+- **Spring Data JPA & Security**
+- **PostgreSQL**
+- **RabbitMQ**
+- **Liquibase**
+- **Maven**
+- **Swagger/OpenAPI (springdoc-openapi)**
+- **Jacoco (Test Coverage)**
+- **SonarQube (Code Analysis)**
 
----
+## Prerequisites
 
-## 3. Authentication Flow
+- **Java 17 JDK** installed.
+- **Maven** installed.
+- **Docker & Docker Compose** installed.
 
-1. **User Registration**
-    - The user provides their credentials (e.g., email, password).
-    - The password is securely hashed (e.g., using BCrypt) before storage in the database.
-    - A role (e.g., `"USER"`) may be assigned by default.
+## Installation
 
-2. **User Login**
-    - The user provides valid credentials (email, password).
-    - The application verifies these credentials against the database.
-    - On success, the server generates:
-        - A **short-lived Access Token** containing user details (subject, roles, etc.).
-        - A **Refresh Token** with a longer lifespan.
-    - Both tokens are returned to the client (e.g., in a JSON response).
+1. **Clone the Repository:**
 
-3. **Accessing Protected Endpoints**
-    - The client includes the Access Token in each request’s `Authorization` header:
-      ```
-      Authorization: Bearer <ACCESS_TOKEN>
-      ```
-    - The server validates the Access Token. If it is valid (not expired, signature checks out), the request proceeds.
-    - If invalid or expired, the request fails with a `401 Unauthorized` (or similar).
+   ```bash
+   git clone <repository-url>
+   cd Guidely
+   ```
 
-4. **Token Expiration & Refresh**
-    - When the Access Token expires (e.g., after 15 minutes), the client cannot make authenticated requests.
-    - Instead of requiring a full re-login, the client uses the **Refresh Token** to obtain a new Access Token:
-        - It sends the Refresh Token (e.g., in the body of a `POST /api/auth/refresh` request).
-        - The server verifies the Refresh Token (signature, expiration, etc.).
-        - If valid, the server issues a **new Access Token** (and possibly a new Refresh Token).
-        - The client updates its stored tokens and continues making requests.
+2. **Configure the Application:**
 
-5. **Refresh Token Expiration**
-    - If the Refresh Token is also expired (or invalid), the server cannot issue a new Access Token.
-    - The client then must prompt the user to log in again with credentials.
+   Adjust the configuration in `application.properties` or `application.yml` as needed for your local environment (e.g., database URL, RabbitMQ settings).
 
----
+3. **Build the Project:**
 
-## 4. Security Considerations
+   ```bash
+   mvn clean install
+   ```
 
-1. **Token Storage**
-    - **Access Tokens** are typically stored in memory or sent in an HTTP-only cookie.
-    - **Refresh Tokens** may be stored in a secure place (e.g., HTTP-only cookie).
-    - Storing tokens in local storage or session storage can risk exposure if an attacker gains access to the browser context.
+## Running the Application
 
-2. **Token Revocation**
-    - By default, JWTs are stateless: once issued, they remain valid until expired.
-    - If you need the ability to revoke tokens (e.g., on logout or suspected compromise), you can store them in a database (or maintain a blacklist) and check their status on each request.
+### Locally via Maven
 
-3. **Transport Security**
-    - Always use **HTTPS** to protect tokens in transit and prevent interception.
+To run the application locally, use the following Maven command:
 
-4. **Expiration Times**
-    - The **Access Token** should have a short expiration (e.g., 15 minutes) to limit its usefulness if stolen.
-    - The **Refresh Token** should have a longer expiration (e.g., 2 hours, 7 days) for user convenience but not indefinite, as that poses a security risk.
+```bash
+mvn spring-boot:run
+```
 
----
+The application will start on port **8080** by default.
 
-## 5. High-Level Steps
+### Using Docker Compose
 
-1. **Register** or **Log In** -> Server returns `{ accessToken, refreshToken }`.
-2. **Call Protected Endpoints** with `Authorization: Bearer <ACCESS_TOKEN>`.
-3. On `401 Unauthorized` (token expired) -> **Refresh** the token:
-    - Send `POST /api/auth/refresh` with `{ refreshToken: "<REFRESH_TOKEN>" }`.
-    - Server verifies the refresh token, issues a new `accessToken` (+ optionally a new `refreshToken`).
-    - Client stores the new tokens and continues.
-4. If the **Refresh Token** is also invalid/expired, the user must **re-authenticate** by logging in again.
+The project includes a Docker Compose file that runs the required infrastructure:
 
----
+- **PostgreSQL** (Guidely Database) on port **5434**
+- **RabbitMQ** on ports **5672** (AMQP) and **15672** (Management UI)
+- **SonarQube** on port **9000** (with its dedicated PostgreSQL on port **5433**)
 
-## 6. Summary
+To start all services, run:
 
-By combining **short-lived Access Tokens** with **long-lived Refresh Tokens**, this approach strikes a balance between security and user convenience:
+```bash
+docker-compose up -d
+```
 
-- **Short-lived tokens** minimize the damage window if a token is compromised.
-- **Refresh Tokens** let users obtain new Access Tokens without constant re-logins.
-- Additional measures (HTTPS, token revocation, secure token storage) further enhance security.
+**Access:**
 
-This README outlines the core concepts and high-level flow for implementing JWT-based authentication with Refresh Tokens in a Spring Boot application secured by Spring Security.
+- **PostgreSQL:** `localhost:5434`
+- **RabbitMQ Management:** [http://localhost:15672](http://localhost:15672) (default credentials: guest/guest)
+- **SonarQube:** [http://localhost:9000](http://localhost:9000)
+
+## Testing
+
+To run unit tests and generate a Jacoco code coverage report, execute:
+
+```bash
+mvn clean verify
+```
+
+After tests complete, the Jacoco report is available in the `target/site/jacoco` directory.
+
+## SonarQube Analysis
+
+Ensure that SonarQube is running (via Docker Compose) at [http://localhost:9000](http://localhost:9000). Then, run the following Maven command to perform a SonarQube analysis:
+
+```bash
+mvn clean verify sonar:sonar -Dsonar.host.url=http://localhost:9000 -Dsonar.login=your_sonar_token
+```
+
+Replace `your_sonar_token` with your actual SonarQube authentication token.
+
+## API Documentation
+
+Once the application is running, you can access the Swagger UI to explore and test the API endpoints:
+
+```
+http://localhost:8080/swagger-ui/index.html
+```
+
+This interactive documentation provides details on each API endpoint, request/response models, and allows you to try out API calls directly from your browser.
+
+## Troubleshooting
+
+- **Docker Issues:**
+   - Ensure Docker and Docker Compose are installed and running.
+   - Run `docker-compose ps` to verify that all containers are healthy.
+   - Check container logs with `docker-compose logs <service-name>`.
+
+- **Application Issues:**
+   - Review the console output for any error messages.
+   - Validate that the configuration properties are correct for your environment.
+
+## Contributing
+
+Contributions are welcome! Please follow these steps:
+
+1. Fork the repository.
+2. Create a feature branch.
+3. Commit your changes.
+4. Open a Pull Request for review.
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+## Contact
+
+For any questions or support, please contact:
+
+- **Name:** Your Name
+- **Email:** [your.email@example.com](mailto:your.email@example.com)
+
