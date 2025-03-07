@@ -25,7 +25,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public Department createDepartment(Department department) {
         Optional<Department> existing = departmentRepository.findByName(department.getName());
-        if(existing.isPresent()){
+        if (existing.isPresent()) {
             throw new DepartmentAlreadyExistsException("Department with name '" + department.getName() + "' already exists.");
         }
         return departmentRepository.save(department);
@@ -49,20 +49,20 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public Department updateDepartment(UUID id, Department updatedDepartment) {
-        Department department = getDepartmentById(id);
-        if (!department.getName().equals(updatedDepartment.getName())) {
-            Optional<Department> existing = departmentRepository.findByName(updatedDepartment.getName());
-            if(existing.isPresent()){
+        Department existingDepartment = getDepartmentById(id);
+        if (!existingDepartment.getName().equals(updatedDepartment.getName())) {
+            Optional<Department> duplicate = departmentRepository.findByName(updatedDepartment.getName());
+            if (duplicate.isPresent()) {
                 throw new DepartmentAlreadyExistsException("Department with name '" + updatedDepartment.getName() + "' already exists.");
             }
         }
-        department.setName(updatedDepartment.getName());
-        return departmentRepository.save(department);
+        existingDepartment.setName(updatedDepartment.getName());
+        return departmentRepository.save(existingDepartment);
     }
 
     @Override
     public void deleteDepartment(UUID id) {
-        Department department = getDepartmentById(id);
-        departmentRepository.delete(department);
+        Department existingDepartment = getDepartmentById(id);
+        departmentRepository.delete(existingDepartment);
     }
 }

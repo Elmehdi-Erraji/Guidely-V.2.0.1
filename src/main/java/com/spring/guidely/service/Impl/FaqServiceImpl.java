@@ -4,8 +4,10 @@ import com.spring.guidely.entities.Faq;
 import com.spring.guidely.repository.FaqRepository;
 import com.spring.guidely.service.FaqService;
 import com.spring.guidely.web.error.FaqNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import java.util.List;
+
 import java.util.UUID;
 
 @Service
@@ -18,8 +20,8 @@ public class FaqServiceImpl implements FaqService {
     }
 
     @Override
-    public List<Faq> getAllFaqs() {
-        return faqRepository.findAll();
+    public Page<Faq> getAllFaqs(Pageable pageable) {
+        return faqRepository.findAll(pageable);
     }
 
     @Override
@@ -39,6 +41,7 @@ public class FaqServiceImpl implements FaqService {
         existingFaq.setQuestion(faq.getQuestion());
         existingFaq.setAnswer(faq.getAnswer());
         existingFaq.setCategory(faq.getCategory());
+        // Optionally, update createdBy if needed (usually it's not changed)
         existingFaq.setCreatedBy(faq.getCreatedBy());
         return faqRepository.save(existingFaq);
     }

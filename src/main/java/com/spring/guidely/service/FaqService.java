@@ -1,11 +1,13 @@
 package com.spring.guidely.service;
 
 import com.spring.guidely.entities.Faq;
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.util.UUID;
 
 public interface FaqService {
-    List<Faq> getAllFaqs();
+    Page<Faq> getAllFaqs(Pageable pageable);
     Faq getFaqById(UUID id);
     Faq createFaq(Faq faq);
     Faq updateFaq(UUID id, Faq faq);
