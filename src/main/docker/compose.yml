@@ -14,7 +14,8 @@ services:
       retries: 10
     ports:
       - "127.0.0.1:5434:5432"
-
+    networks:
+      - guidely-net
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -27,6 +28,36 @@ services:
       RABBITMQ_DEFAULT_PASS: guest
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - guidely-net
+
+  sonar-postgres:
+    image: postgres:latest
+    container_name: sonar-postgres
+    environment:
+      - POSTGRES_USER=sonar
+      - POSTGRES_PASSWORD=sonar
+      - POSTGRES_DB=sonar
+    ports:
+      - "5433:5432"
+    networks:
+      - guidely-net
+
+  sonarqube:
+    image: sonarqube:latest
+    container_name: sonarqube
+    environment:
+      - SONAR_QUIET=true
+    ports:
+      - "9000:9000"
+    depends_on:
+      - sonar-postgres
+    networks:
+      - guidely-net
 
 volumes:
   rabbitmq_data:
+
+networks:
+  guidely-net:
+    driver: bridge
