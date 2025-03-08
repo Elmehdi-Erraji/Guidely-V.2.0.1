@@ -1,0 +1,187 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: Mehdi
+      changes:
+        # Create permissions table
+        - createTable:
+            tableName: permissions
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)
+                  constraints:
+                    unique: true
+                    nullable: false
+
+        # Create roles table
+        - createTable:
+            tableName: roles
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)
+                  constraints:
+                    unique: true
+                    nullable: false
+
+        # Create role_permissions table
+        - createTable:
+            tableName: role_permissions
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: role_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: permission_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+
+        # Create app_users table
+        - createTable:
+            tableName: app_users
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                  defaultValueComputed: gen_random_uuid()
+              - column:
+                  name: name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: email
+                  type: varchar(255)
+                  constraints:
+                    unique: true
+                    nullable: false
+              - column:
+                  name: password
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: role_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+
+        # Add foreign key constraints
+        - addForeignKeyConstraint:
+            baseTableName: role_permissions
+            baseColumnNames: role_id
+            constraintName: fk_role_permissions_role
+            referencedTableName: roles
+            referencedColumnNames: id
+
+        - addForeignKeyConstraint:
+            baseTableName: role_permissions
+            baseColumnNames: permission_id
+            constraintName: fk_role_permissions_permission
+            referencedTableName: permissions
+            referencedColumnNames: id
+
+        - addForeignKeyConstraint:
+            baseTableName: app_users
+            baseColumnNames: role_id
+            constraintName: fk_app_users_role
+            referencedTableName: roles
+            referencedColumnNames: id
+
+  - changeSet:
+      id: 2
+      author: developer
+      changes:
+        # Insert permissions
+        - sql:
+            sql: |
+              INSERT INTO permissions (id, name) VALUES 
+              (gen_random_uuid(), 'VIEW_DASHBOARD'),
+              (gen_random_uuid(), 'MANAGE_USERS'),
+              (gen_random_uuid(), 'MANAGE_ROLES'),
+              (gen_random_uuid(), 'VIEW_REPORTS'),
+              (gen_random_uuid(), 'CREATE_TICKET'),
+              (gen_random_uuid(), 'RESOLVE_TICKET'),
+              (gen_random_uuid(), 'VIEW_TICKET'),
+              (gen_random_uuid(), 'MANAGE_SYSTEM_SETTINGS');
+
+        # Insert roles
+        - sql:
+            sql: |
+              INSERT INTO roles (id, name) VALUES 
+              (gen_random_uuid(), 'ADMIN'),
+              (gen_random_uuid(), 'SUPPORT_AGENT'),
+              (gen_random_uuid(), 'CLIENT');
+
+        # Insert permissions for ADMIN role (all permissions)
+        - sql:
+            sql: |
+              INSERT INTO role_permissions (id, role_id, permission_id)
+              SELECT gen_random_uuid(), 
+                     (SELECT id FROM roles WHERE name = 'ADMIN'),
+                     id
+              FROM permissions;
+
+        # Insert permissions for SUPPORT_AGENT role
+        - sql:
+            sql: |
+              INSERT INTO role_permissions (id, role_id, permission_id)
+              SELECT gen_random_uuid(),
+                     (SELECT id FROM roles WHERE name = 'SUPPORT_AGENT'),
+                     id
+              FROM permissions 
+              WHERE name IN ('VIEW_DASHBOARD', 'VIEW_REPORTS', 'CREATE_TICKET', 
+                           'RESOLVE_TICKET', 'VIEW_TICKET');
+
+        # Insert permissions for CLIENT role
+        - sql:
+            sql: |
+              INSERT INTO role_permissions (id, role_id, permission_id)
+              SELECT gen_random_uuid(),
+                     (SELECT id FROM roles WHERE name = 'CLIENT'),
+                     id
+              FROM permissions 
+              WHERE name IN ('CREATE_TICKET', 'VIEW_TICKET');
+
+        # Insert sample users
+        - sql:
+            sql: |
+              -- Admin user
+              INSERT INTO app_users (name, email, password, role_id)
+              VALUES ('System Admin', 'admin@example.com', '$2a$10$ENCRYPTED_PASSWORD_HASH', 
+                      (SELECT id FROM roles WHERE name = 'ADMIN'));
+              
+              -- Support agent user
+              INSERT INTO app_users (name, email, password, role_id)
+              VALUES ('Support Agent', 'support@example.com', '$2a$10$ENCRYPTED_PASSWORD_HASH', 
+                      (SELECT id FROM roles WHERE name = 'SUPPORT_AGENT'));
+              
+              -- Client user
+              INSERT INTO app_users (name, email, password, role_id)
+              VALUES ('Client User', 'client@example.com', '$2a$10$ENCRYPTED_PASSWORD_HASH', 
+                      (SELECT id FROM roles WHERE name = 'CLIENT'));

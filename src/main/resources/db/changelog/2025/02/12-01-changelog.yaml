@@ -1,0 +1,74 @@
+databaseChangeLog:
+  - changeSet:
+      id: 0-enable-pgcrypto
+      author: Mehdi
+      preConditions:
+        - dbms:
+            type: postgresql
+      changes:
+        - sql:
+            sql: "CREATE EXTENSION IF NOT EXISTS pgcrypto;"
+
+  - changeSet:
+      id: 1-create-departments-table
+      author: Mehdi
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: departments
+      changes:
+        - createTable:
+            tableName: departments
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  defaultValueComputed: "gen_random_uuid()"
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+
+  - changeSet:
+      id: 2-add-department-column-to-app_users
+      author: Mehdi
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - columnExists:
+                tableName: app_users
+                columnName: department_id
+      changes:
+        - addColumn:
+            tableName: app_users
+            columns:
+              - column:
+                  name: department_id
+                  type: uuid
+                  constraints:
+                    nullable: true
+        - addForeignKeyConstraint:
+            baseTableName: app_users
+            baseColumnNames: department_id
+            referencedTableName: departments
+            referencedColumnNames: id
+            constraintName: fk_app_users_department
+            onDelete: CASCADE
+
+  # Optional: If the departments table already exists without the proper default on the "id" column,
+  # this changeset will set the default value.
+  - changeSet:
+      id: 3-alter-departments-id-default
+      author: Mehdi
+      preConditions:
+        - tableExists:
+            tableName: departments
+      changes:
+        - sql:
+            sql: "ALTER TABLE departments ALTER COLUMN id SET DEFAULT gen_random_uuid();"

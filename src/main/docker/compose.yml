@@ -55,19 +55,6 @@ services:
     networks:
       - guidely-net
 
-  guidely:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: guidely
-    ports:
-      - "8080:8080"
-    depends_on:
-      - postgresql
-      - rabbitmq
-    networks:
-      - guidely-net
-
 volumes:
   rabbitmq_data:
 
