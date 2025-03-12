@@ -1,162 +1,269 @@
 
-# Guidely
+# 🚀 Guidely - The Smart Ticketing System 🎟️
 
-**Guidely** is a ticket management system built with Spring Boot. It handles ticket creation, assignment, and notifications while enforcing business rules such as duplicate title validation. The project leverages modern technologies and DevOps practices to ensure quality and maintainability.
+**Guidely** is a **modern ticket management system** built with **Spring Boot**. It streamlines **ticket creation, assignment, and notifications** while ensuring **quality and maintainability** with DevOps best practices. Oh, and did we mention **real-time updates with WebSockets?** 🚀  
 
-## Table of Contents
+Need a **reliable and scalable** helpdesk system? **Guidely’s got you covered!** 🎯  
 
-- [Features](#features)
-- [Technologies](#technologies)
-- [Prerequisites](#prerequisites)
-- [Installation](#installation)
-- [Running the Application](#running-the-application)
-  - [Locally via Maven](#locally-via-maven)
-  - [Using Docker Compose](#using-docker-compose)
-- [Testing](#testing)
-- [SonarQube Analysis](#sonarqube-analysis)
-- [API Documentation](#api-documentation)
-- [Troubleshooting](#troubleshooting)
-- [Contributing](#contributing)
-- [License](#license)
-- [Contact](#contact)
+---
 
-## Features
+## 🗂️ Table of Contents  
 
-- **Ticket Operations:** Create, update, delete, and reassign tickets.
-- **Duplicate Validation:** Prevents creation or update of tickets with duplicate titles.
-- **Agent Assignment:** Automatically assigns tickets to support agents using a least busy algorithm.
-- **Notifications:** Sends email notifications via RabbitMQ.
-- **API Documentation:** Swagger/OpenAPI integration for interactive API docs.
-- **Code Quality:** Integrated Jacoco for code coverage and SonarQube for static analysis.
+- [🔥 Features](#-features)  
+- [🛠️ Technologies](#️-technologies)  
+- [📌 Prerequisites](#-prerequisites)  
+- [⚙️ Installation](#️-installation)  
+- [🚀 Running the Application](#-running-the-application)  
+  - [Locally via Maven](#locally-via-maven)  
+  - [Using Docker Compose](#using-docker-compose)  
+- [✅ Testing](#-testing)  
+- [📊 SonarQube Analysis](#-sonarqube-analysis)  
+- [🔄 Real-time WebSocket Updates](#-real-time-websocket-updates)  
+- [🔧 Jenkins Pipeline](#-jenkins-pipeline)  
+- [📖 API Documentation](#-api-documentation)  
+- [💡 Troubleshooting](#-troubleshooting)  
+- [🤝 Contributing](#-contributing)  
+- [📝 License](#-license)  
+- [📬 Contact](#-contact)  
 
-## Technologies
+---
 
-- **Java 17**
-- **Spring Boot 3.4.1**
-- **Spring Data JPA & Security**
-- **PostgreSQL**
-- **RabbitMQ**
-- **Liquibase**
-- **Maven**
-- **Swagger/OpenAPI (springdoc-openapi)**
-- **Jacoco (Test Coverage)**
-- **SonarQube (Code Analysis)**
+## 🔥 Features  
 
-## Prerequisites
+✅ **Ticket Operations:** Create, update, delete, and reassign tickets effortlessly.  
+✅ **Duplicate Protection:** Stops duplicate tickets in their tracks.  
+✅ **Smart Agent Assignment:** Uses the **least-busy-first** algorithm to assign tickets.  
+✅ **WebSocket-powered Real-Time Updates:** Get instant ticket status updates with **no page refresh!** 🔄  
+✅ **Email Notifications:** Integrated **RabbitMQ messaging system** sends ticket updates straight to your inbox.  
+✅ **Swagger API Docs:** Built-in, interactive API documentation.  
+✅ **Top-Notch Code Quality:** Thanks to **Jacoco (code coverage) & SonarQube (static analysis).**  
 
-- **Java 17 JDK** installed.
-- **Maven** installed.
-- **Docker & Docker Compose** installed.
+---
 
-## Installation
+## 🛠️ Technologies  
 
-1. **Clone the Repository:**
+🚀 **Java 17**  
+🛠️ **Spring Boot 3.4.1**  
+🔐 **Spring Security & JWT**  
+🐘 **PostgreSQL**  
+📩 **RabbitMQ for messaging**  
+🗂 **Liquibase (DB migrations)**  
+📜 **Swagger/OpenAPI (Docs)**  
+📈 **Jacoco (Test Coverage)**  
+🧪 **SonarQube (Code Analysis)**  
+📡 **Spring WebSockets for real-time updates**  
 
-   ```bash
-   git clone <repository-url>
-   cd Guidely
-   ```
+---
 
-2. **Configure the Application:**
+## 📌 Prerequisites  
 
-   Adjust the configuration in `application.properties` or `application.yml` as needed for your local environment (e.g., database URL, RabbitMQ settings).
+Before you jump in, make sure you have:  
 
-3. **Build the Project:**
+🔹 **Java 17** installed  
+🔹 **Maven** installed  
+🔹 **Docker & Docker Compose** installed  
 
-   ```bash
-   mvn clean install
-   ```
+---
 
-## Running the Application
+## ⚙️ Installation  
 
-### Locally via Maven
+1️⃣ **Clone the Repository:**  
 
-To run the application locally, use the following Maven command:
+```bash
+git clone <repository-url>
+cd Guidely
+```
+
+2️⃣ **Configure the Application:**
+
+Edit `application.properties` or `application.yml` for local DB and RabbitMQ settings.
+
+3️⃣ **Build the Project:**
+
+```bash
+mvn clean install
+```
+
+---
+
+## 🚀 Running the Application
+
+### 🖥️ Locally via Maven
+
+Run the app with:
 
 ```bash
 mvn spring-boot:run
 ```
 
-The application will start on port **8080** by default.
+The app launches on **port 8080**! 🚀
 
-### Using Docker Compose
+### 🐳 Using Docker Compose
 
-The project includes a Docker Compose file that runs the required infrastructure:
-
-- **PostgreSQL** (Guidely Database) on port **5434**
-- **RabbitMQ** on ports **5672** (AMQP) and **15672** (Management UI)
-- **SonarQube** on port **9000** (with its dedicated PostgreSQL on port **5433**)
-
-To start all services, run:
+To start all services (PostgreSQL, RabbitMQ, SonarQube), run:
 
 ```bash
 docker-compose up -d
 ```
 
-**Access:**
+**Access Services:**
 
-- **PostgreSQL:** `localhost:5434`
-- **RabbitMQ Management:** [http://localhost:15672](http://localhost:15672) (default credentials: guest/guest)
-- **SonarQube:** [http://localhost:9000](http://localhost:9000)
+🔹 PostgreSQL: `localhost:5434`  
+🔹 RabbitMQ UI: [http://localhost:15672](http://localhost:15672) (guest/guest)  
+🔹 SonarQube: [http://localhost:9000](http://localhost:9000)
 
-## Testing
+---
 
-To run unit tests and generate a Jacoco code coverage report, execute:
+## ✅ Testing
+
+Run unit tests & generate code coverage reports:
 
 ```bash
 mvn clean verify
 ```
 
-After tests complete, the Jacoco report is available in the `target/site/jacoco` directory.
+Coverage reports will be in `target/site/jacoco`.
 
-## SonarQube Analysis
+---
 
-Ensure that SonarQube is running (via Docker Compose) at [http://localhost:9000](http://localhost:9000). Then, run the following Maven command to perform a SonarQube analysis:
+## 📊 SonarQube Analysis
+
+Make sure SonarQube is running at **[http://localhost:9000](http://localhost:9000)**, then run:
 
 ```bash
 mvn clean verify sonar:sonar -Dsonar.host.url=http://localhost:9000 -Dsonar.login=your_sonar_token
 ```
 
-Replace `your_sonar_token` with your actual SonarQube authentication token.
+Replace `your_sonar_token` with your actual SonarQube token.
 
-## API Documentation
+---
 
-Once the application is running, you can access the Swagger UI to explore and test the API endpoints:
+## 🔄 Real-time WebSocket Updates
+
+Guidely supports **real-time updates** via WebSockets! 🛰
+
+Want **instant ticket status updates** without refreshing the page? Just subscribe to:
+
+📡 **WebSocket Endpoint:**
+
+```
+ws://localhost:8080/ws/tickets
+```
+
+🔹 **How it Works:**
+
+- When a new ticket is created or updated, all connected users receive instant updates.
+- No more manual refreshes—stay up-to-date in real-time! 🚀
+
+**Example:**
+
+```javascript
+const socket = new WebSocket("ws://localhost:8080/ws/tickets");
+
+socket.onmessage = (event) => {
+    console.log("New ticket update:", event.data);
+};
+```
+
+---
+
+## 🔧 Jenkins Pipeline
+
+Automate build, analysis, and deployment with this **Jenkinsfile**:
+
+```groovy
+pipeline {
+    agent any
+
+    environment {
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id')
+        DOCKER_IMAGE = "mehdi02/guidely:latest"
+        SONAR_TOKEN = credentials('sonar-token')
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'dev', url: 'https://github.com/Elmehdi-Erraji/Guidely-V.2.0.1'
+            }
+        }
+
+        stage('Build Maven') {
+            steps {
+                sh 'mvn clean package'
+            }
+        }
+
+        stage('Analyse SonarQube') {
+            steps {
+                withSonarQubeEnv('sonar') {
+                    sh "mvn sonar:sonar -Dsonar.login=${SONAR_TOKEN}"
+                }
+            }
+        }
+
+        stage('Docker Build and Push') {
+            steps {
+                script {
+                    sh "echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin"
+                    sh "docker build -t ${DOCKER_IMAGE} ."
+                    sh "docker push ${DOCKER_IMAGE}"
+                }
+            }
+        }
+    }
+}
+```
+
+---
+
+## 📖 API Documentation
+
+Access **Swagger UI** here:
 
 ```
 http://localhost:8080/swagger-ui/index.html
 ```
 
-This interactive documentation provides details on each API endpoint, request/response models, and allows you to try out API calls directly from your browser.
+Interactive, self-documented API FTW! 🎯
 
-## Troubleshooting
+---
 
-- **Docker Issues:**
-   - Ensure Docker and Docker Compose are installed and running.
-   - Run `docker-compose ps` to verify that all containers are healthy.
-   - Check container logs with `docker-compose logs <service-name>`.
+## 💡 Troubleshooting
 
-- **Application Issues:**
-   - Review the console output for any error messages.
-   - Validate that the configuration properties are correct for your environment.
+**Docker Issues?**
+- Run `docker-compose ps` to check service health.
+- Use `docker-compose logs <service-name>` for debugging.
 
-## Contributing
+**Application Issues?**
+- Check error logs in the console.
+- Verify config files (`application.yml`).
 
-Contributions are welcome! Please follow these steps:
+---
 
-1. Fork the repository.
-2. Create a feature branch.
-3. Commit your changes.
-4. Open a Pull Request for review.
+## 🤝 Contributing
 
-## License
+Contributions are **welcome!** 🚀
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+1. Fork the repo
+2. Create a feature branch
+3. Commit your changes
+4. Open a **Pull Request**
 
-## Contact
+---
 
-For any questions or support, please contact:
+## 📝 License
 
-- **Name:** Your Name
-- **Email:** [your.email@example.com](mailto:your.email@example.com)
+**MIT License** – Use, modify, and distribute freely! 🏆
+
+---
+
+## 📬 Contact
+
+📌 **Author:** Mehdi Erraji  
+📧 **Email:** [elmehdi-erraji@hotmail.com](mailto:elmehdi-erraji@hotmail.com)  
+
+---
+
+Now go ahead and **launch** Guidely! 🚀💡🎟
 
