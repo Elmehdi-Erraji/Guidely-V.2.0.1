@@ -1,5 +1,6 @@
 package com.spring.guidely.entities;
 
+import com.spring.guidely.entities.enums.MessageType;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -34,7 +35,10 @@ public class Message {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private MessageType type;  // NEW: add type field
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
-
 }
