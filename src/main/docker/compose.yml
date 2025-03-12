@@ -63,6 +63,8 @@ services:
       - "50000:50000"
     volumes:
       - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+
     networks:
       - guidely-net
 
@@ -73,3 +75,9 @@ volumes:
 networks:
   guidely-net:
     driver: bridge
+
+
+
+  #docker exec -u root -it jenkins bash
+  #ls -l /var/run/docker.sock
+  #chown root:docker /var/run/docker.sock

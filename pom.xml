@@ -33,7 +33,7 @@
         <sonar.projectKey>guidely</sonar.projectKey>
         <sonar.projectName>guidely</sonar.projectName>
         <sonar.projectVersion>0.0.1-SNAPSHOT</sonar.projectVersion>
-        <sonar.login>squ_af4c531d2ea67ccf7eb7747998d74d4750aa2fe0</sonar.login>
+        <sonar.login>squ_fc4270bffff4a63b24bcfc38e19166d17f16411f</sonar.login>
     </properties>
     <dependencies>
 
