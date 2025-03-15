@@ -87,10 +87,11 @@ public class AuthServiceImpl implements AuthService {
             throw new AuthException("Invalid credentials!");
         }
 
+        String role = appUser.getRole().getName();
         String accessToken = jwtService.generateAccessToken(appUser);
         String refreshToken = jwtService.generateRefreshToken(appUser);
 
-        return new AuthResponse(accessToken, refreshToken);
+        return new AuthResponse(role,accessToken, refreshToken);
     }
 
     @Override
@@ -103,10 +104,11 @@ public class AuthServiceImpl implements AuthService {
         AppUser appUser = authRepository.findByEmail(email)
                 .orElseThrow(() -> new AuthException("User not found for refresh token"));
 
+        String role = appUser.getRole().getName();
         String newAccessToken = jwtService.generateAccessToken(appUser);
         String newRefreshToken = jwtService.generateRefreshToken(appUser);
 
-        return new AuthResponse(newAccessToken, newRefreshToken);
+        return new AuthResponse(role,newAccessToken, newRefreshToken);
     }
 
     @Override

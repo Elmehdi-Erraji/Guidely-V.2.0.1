@@ -1,12 +1,24 @@
 package com.spring.guidely.service.dto;
 
 public class AuthResponse {
+
+    private String role;
     private String accessToken;
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
     private String refreshToken;
 
     public AuthResponse() {}
 
-    public AuthResponse(String accessToken, String refreshToken) {
+    public AuthResponse(String role,String accessToken, String refreshToken) {
+        this.role = role;
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
     }
