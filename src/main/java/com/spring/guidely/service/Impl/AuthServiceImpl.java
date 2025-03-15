@@ -114,6 +114,7 @@ public class AuthServiceImpl implements AuthService {
         AppUser user = authRepository.findByEmail(email)
                 .orElseThrow(() -> new AuthException("Email not found"));
 
+        // Generate token and set expiration
         String token = UUID.randomUUID().toString();
         LocalDateTime expiration = LocalDateTime.now().plusMinutes(resetTokenExpirationMinutes);
         String formattedExpiration = expiration.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
@@ -124,8 +125,12 @@ public class AuthServiceImpl implements AuthService {
         resetToken.setUser(user);
         passwordResetTokenRepository.save(resetToken);
 
+        // Build the reset link (adjust the URL as needed)
+        String resetLink = "http://localhost:4200/dashboard/auth/PasswordReset?token=" + token;
+
+        // Load and render the email template
         String template = loadEmailTemplate("templates/password-reset-email.html");
-        String emailContent = renderEmailTemplate(template, user.getName(), token, formattedExpiration);
+        String emailContent = renderEmailTemplate(template, user.getName(), token, formattedExpiration, resetLink);
         String subject = "Password Reset Request";
 
         Map<String, String> emailData = new HashMap<>();
@@ -163,10 +168,11 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 
-    private String renderEmailTemplate(String template, String userName, String token, String expiration) {
+    private String renderEmailTemplate(String template, String userName, String token, String expiration, String resetLink) {
         return template
                 .replace("{{userName}}", userName)
-                .replace("{{token}}", token)
-                .replace("{{expiration}}", expiration);
+                .replace("{{token}}", token)  // if you want to still show the token
+                .replace("{{expiration}}", expiration)
+                .replace("{{resetLink}}", resetLink);
     }
 }

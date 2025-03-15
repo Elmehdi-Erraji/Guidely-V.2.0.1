@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -40,13 +42,14 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/password-reset/request")
-    public ResponseEntity<Void> requestPasswordReset(@RequestParam String email) {
+    @PostMapping("/forgetPassword")
+    public ResponseEntity<Void> requestPasswordReset(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
         authService.requestPasswordReset(email);
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/password-reset")
+    @PostMapping("/resetPassword")
     public ResponseEntity<Void> resetPassword(
             @RequestParam String token,
             @RequestParam String newPassword) {
