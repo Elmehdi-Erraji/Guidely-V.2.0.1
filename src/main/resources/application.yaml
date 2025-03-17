@@ -48,7 +48,7 @@ server:
 jwt:
   secret: Wdx7ZeyAoF1pZ4R7Ksc5q9ut03Hw3HYyqN3Ei2Ly+H7zXLP44xZQwp65wwroBO3S
   access:
-    expiration: 900000
+    expiration: 3600000
   refresh:
     expiration: 7200000
 
