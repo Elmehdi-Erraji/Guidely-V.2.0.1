@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -91,5 +92,10 @@ public class UserController {
         }
         userService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/roles")
+    public ResponseEntity<List <Role>> getAllRoles() {
+        return ResponseEntity.ok(roleRepository.findAll());
     }
 }

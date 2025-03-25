@@ -1,5 +1,6 @@
 package com.spring.guidely.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -40,6 +41,7 @@ public class Department {
         this.name = name;
     }
 
+
     public List<AppUser> getUsers() {
         return users;
     }
@@ -51,6 +53,7 @@ public class Department {
     @Column(nullable = false, unique = true)
     private String name;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "department", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AppUser> users = new ArrayList<>();
 

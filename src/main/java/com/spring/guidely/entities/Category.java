@@ -1,5 +1,6 @@
 package com.spring.guidely.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -30,6 +31,7 @@ public class Category {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Faq> faqs = new ArrayList<>();
 }
