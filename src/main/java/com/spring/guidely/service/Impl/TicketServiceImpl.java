@@ -12,6 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.io.BufferedReader;
@@ -137,4 +139,17 @@ public class TicketServiceImpl implements TicketService {
         rabbitTemplate.convertAndSend(RabbitMQConfig.EMAIL_EXCHANGE, RabbitMQConfig.EMAIL_ROUTING_KEY, emailData);
         logger.info("Sent assignment email to {}", supportAgent.getEmail());
     }
+
+
+    @Override
+    public Page<Ticket> getTicketsByCreatedBy(UUID userId, Pageable pageable) {
+        return ticketRepository.findByCreatedBy_Id(userId, pageable);
+    }
+
+    @Override
+    public Page<Ticket> getTicketsAssignedTo(UUID userId, Pageable pageable) {
+        return ticketRepository.findByAssignedTo_Id(userId, pageable);
+    }
+
+
 }

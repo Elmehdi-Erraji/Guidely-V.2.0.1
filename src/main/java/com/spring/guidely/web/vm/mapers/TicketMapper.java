@@ -32,6 +32,7 @@ public class TicketMapper {
         vm.setPriority(ticket.getPriority().name());
         vm.setCreatedByName(ticket.getCreatedBy() != null ? ticket.getCreatedBy().getName() : null);
         vm.setAssignedToName(ticket.getAssignedTo() != null ? ticket.getAssignedTo().getName() : null);
+        vm.setCreatedAt(ticket.getCreatedAt() != null ? ticket.getCreatedAt() : null);
         return vm;
     }
 }

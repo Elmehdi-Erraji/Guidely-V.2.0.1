@@ -58,6 +58,9 @@ public class UserController {
                                                      @Valid @RequestBody UserUpdateRequestVM updateRequest) {
         AppUser existingUser = userService.getUserById(id)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + id));
+        if (updateRequest.getPassword() == null || updateRequest.getPassword().trim().isEmpty()) {
+            updateRequest.setPassword(existingUser.getPassword());
+        }
         userVMMapper.updateEntity(updateRequest, existingUser);
         Role role = roleRepository.findById(updateRequest.getRoleId())
                 .orElseThrow(() -> new IllegalArgumentException("Role not found with id: " + updateRequest.getRoleId()));
