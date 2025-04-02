@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -57,6 +58,9 @@ public class UserController {
                                                      @Valid @RequestBody UserUpdateRequestVM updateRequest) {
         AppUser existingUser = userService.getUserById(id)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + id));
+        if (updateRequest.getPassword() == null || updateRequest.getPassword().trim().isEmpty()) {
+            updateRequest.setPassword(existingUser.getPassword());
+        }
         userVMMapper.updateEntity(updateRequest, existingUser);
         Role role = roleRepository.findById(updateRequest.getRoleId())
                 .orElseThrow(() -> new IllegalArgumentException("Role not found with id: " + updateRequest.getRoleId()));
@@ -91,5 +95,10 @@ public class UserController {
         }
         userService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/roles")
+    public ResponseEntity<List <Role>> getAllRoles() {
+        return ResponseEntity.ok(roleRepository.findAll());
     }
 }

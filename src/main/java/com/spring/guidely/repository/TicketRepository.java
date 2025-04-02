@@ -3,6 +3,8 @@ package com.spring.guidely.repository;
 import com.spring.guidely.entities.AppUser;
 import com.spring.guidely.entities.Ticket;
 import com.spring.guidely.entities.enums.TicketStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -25,4 +27,7 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID> {
                                         @Param("status1") String status1,
                                         @Param("status2") String status2);
 
+
+    Page<Ticket> findByCreatedBy_Id(UUID userId, Pageable pageable);
+    Page<Ticket> findByAssignedTo_Id(UUID userId, Pageable pageable);
 }

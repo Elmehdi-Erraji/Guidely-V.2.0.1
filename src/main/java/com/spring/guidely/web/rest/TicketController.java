@@ -10,7 +10,11 @@ import com.spring.guidely.web.error.DuplicateTicketException;
 import com.spring.guidely.web.vm.mapers.TicketMapper;
 import com.spring.guidely.web.vm.ticker.TicketRequestVM;
 import com.spring.guidely.web.vm.ticker.TicketResponseVM;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
@@ -97,5 +101,27 @@ public class TicketController {
     public ResponseEntity<Void> deleteTicket(@PathVariable UUID id) {
         ticketService.deleteTicket(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/my")
+    public ResponseEntity<Page<TicketResponseVM>> getTicketsByCreatedBy(
+            @RequestParam UUID userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Ticket> ticketsPage = ticketService.getTicketsByCreatedBy(userId, pageable);
+        Page<TicketResponseVM> response = ticketsPage.map(TicketMapper::toResponseVM);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/assigned")
+    public ResponseEntity<Page<TicketResponseVM>> getAssignedTickets(
+            @RequestParam UUID userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Ticket> ticketsPage = ticketService.getTicketsAssignedTo(userId, pageable);
+        Page<TicketResponseVM> response = ticketsPage.map(TicketMapper::toResponseVM);
+        return ResponseEntity.ok(response);
     }
 }
